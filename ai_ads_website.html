@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdMotion — The AI Content System That Gets You Paid</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --black: #0a0a0a; --white: #ffffff;
+    --g1: #111111; --g2: #1a1a1a; --g3: #2a2a2a; --g4: #444444; --g5: #888888; --g6: #bbbbbb;
+    --accent: #fb8b24;
+    --accent-dim: rgba(251,139,36,.15);
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--black); color: var(--white); overflow-x: hidden; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 3rem; background: rgba(10,10,10,.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--g3); }
+  .nav-logo { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--white); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { font-size: 13px; color: var(--g5); text-decoration: none; letter-spacing: .04em; transition: color .2s; }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta { font-size: 13px; padding: .5rem 1.25rem; background: var(--accent); border-radius: 100px; color: var(--black); text-decoration: none; font-weight: 700; letter-spacing: .04em; transition: opacity .2s; }
+  .nav-cta:hover { opacity: .85; }
+  .section-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; font-weight: 600; }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .section-cta-wrap { display: flex; flex-direction: column; align-items: center; gap: .75rem; margin-top: 3rem; }
+  .btn-primary { display: inline-flex; align-items: center; gap: .5rem; background: var(--accent); color: var(--black); padding: .9rem 2rem; border-radius: 100px; font-size: 15px; font-weight: 700; text-decoration: none; transition: opacity .2s, transform .2s var(--ease), box-shadow .3s var(--ease); }
+  .btn-primary:hover { opacity: .9; transform: scale(1.02); box-shadow: 0 0 24px rgba(251,139,36,0.35), 0 0 48px rgba(251,139,36,0.15); }
+  .btn-guarantee { font-size: 12px; color: var(--g5); letter-spacing: .04em; }
+
+  /* HERO */
+  #hero { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden; padding: 120px 2rem 80px; background: var(--g1); }
+  .hero-content { position: relative; z-index: 2; max-width: 1050px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .hero-eyebrow { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; font-weight: 600; opacity: 0; animation: fadeUp .8s var(--ease) .1s forwards; }
+  .hero-headline { font-size: clamp(2.4rem,4.8vw,4.2rem); font-weight: 700; line-height: 1.2; letter-spacing: -.03em; margin-bottom: 2rem; opacity: 0; animation: fadeUp .9s var(--ease) .2s forwards; display: block; width: 100%; text-align: center; }
+  .hero-headline span { display: inline; width: auto; }
+  .hero-headline .accent { color: var(--accent); }
+  .hero-sub { font-size: 17px; color: var(--g5); line-height: 1.7; max-width: 580px; margin-bottom: 2.5rem; opacity: 0; animation: fadeUp .9s var(--ease) .35s forwards; }
+  .hero-cta-wrap { display: flex; flex-direction: column; align-items: center; gap: .75rem; opacity: 0; animation: fadeUp .9s var(--ease) .5s forwards; }
+  .hero-guarantee { font-size: 12px; color: var(--g5); letter-spacing: .04em; }
+
+  /* SOCIAL PROOF BAR */
+  #proof-bar { background: var(--black); border-top: 1px solid var(--g3); border-bottom: 1px solid var(--g3); padding: 1.25rem 3rem; display: flex; align-items: center; justify-content: center; gap: 3rem; }
+  .proof-item { font-size: 13px; color: var(--g5); letter-spacing: .04em; display: flex; align-items: center; gap: .5rem; }
+  .proof-item strong { color: var(--white); font-weight: 600; }
+  .proof-sep { width: 1px; height: 16px; background: var(--g3); }
+
+  /* FEATURES */
+  #features { padding: 140px 0; background: var(--g1); border-top: 1px solid var(--g3); }
+  .features-header { max-width: 1200px; margin: 0 auto 80px; padding: 0 3rem; }
+  .features-headline { font-size: clamp(1.75rem,3.5vw,2.75rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.15; max-width: 640px; }
+  .reel-wrap { position: relative; padding: 0 0 80px; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+  .reel-stage { position: relative; width: 100%; height: 580px; display: flex; align-items: center; justify-content: center; }
+  .reel-card { position: absolute; width: 260px; height: 462px; border-radius: 20px; overflow: hidden; border: 1px solid var(--g3); background: var(--g2); display: flex; align-items: center; justify-content: center; transition: transform .7s var(--ease), opacity .7s var(--ease), filter .7s var(--ease); will-change: transform, opacity; cursor: pointer; }
+  .reel-card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .reel-card[data-pos="active"] { transform: translateX(0) scale(1); opacity: 1; filter: none; z-index: 3; }
+  .reel-card[data-pos="prev"] { transform: translateX(-300px) scale(0.88); opacity: .55; filter: brightness(.7); z-index: 2; }
+  .reel-card[data-pos="next"] { transform: translateX(300px) scale(0.88); opacity: .55; filter: brightness(.7); z-index: 2; }
+  .reel-card[data-pos="hidden"] { transform: translateX(0) scale(0.75); opacity: 0; z-index: 1; pointer-events: none; }
+  .reel-progress { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); width: 260px; height: 2px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+  .reel-progress-fill { height: 100%; background: var(--accent); width: 0; }
+  .reel-progress-fill.running { transition: width 3s linear; width: 100%; }
+  .reel-ui { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+  .reel-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.25); transition: background .3s, width .3s var(--ease); cursor: pointer; }
+  .reel-dot.active { background: var(--accent); width: 20px; border-radius: 100px; }
+  .reel-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color .2s, background .2s; }
+  .reel-arrow:hover { border-color: var(--accent); background: rgba(251,139,36,.1); }
+  .reel-arrow.prev { left: calc(50% - 200px); }
+  .reel-arrow.next { right: calc(50% - 200px); }
+
+  /* PROBLEM */
+  #problem { padding: 160px 0; background: var(--black); border-top: 1px solid var(--g3); }
+  .problem-inner { max-width: 1200px; margin: 0 auto; padding: 0 3rem; }
+  .problem-header { max-width: 640px; margin-bottom: 64px; }
+  .problem-headline { font-size: clamp(2rem,4vw,3.25rem); font-weight: 700; letter-spacing: -.04em; line-height: 1.1; margin-top: .5rem; }
+  .problem-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+  .problem-card { padding: 2rem; border: 1px solid var(--g3); border-radius: 14px; background: var(--g1); opacity: 0; transform: translateY(20px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .problem-card.visible { opacity: 1; transform: translateY(0); }
+  .problem-card:nth-child(2) { transition-delay: .08s; }
+  .problem-card:nth-child(3) { transition-delay: .16s; }
+  .problem-card:nth-child(4) { transition-delay: .24s; }
+  .problem-card:nth-child(5) { transition-delay: .32s; }
+  .problem-card:nth-child(6) { transition-delay: .4s; }
+  .problem-card-num { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: .75rem; }
+  .problem-card-title { font-size: 17px; font-weight: 600; letter-spacing: -.02em; margin-bottom: .5rem; }
+  .problem-card-text { font-size: 14px; color: var(--g5); line-height: 1.7; }
+
+  /* SOLUTION */
+  #solution { padding: 160px 0; background: var(--g1); border-top: 1px solid var(--g3); }
+  .solution-inner { max-width: 1200px; margin: 0 auto; padding: 0 3rem; }
+  .solution-header { max-width: 640px; margin-bottom: 64px; }
+  .solution-headline { font-size: clamp(2rem,4vw,3.25rem); font-weight: 700; letter-spacing: -.04em; line-height: 1.1; margin-top: .5rem; }
+  .solution-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+  .solution-card { padding: 2.5rem; border: 1px solid var(--g3); border-radius: 14px; background: var(--g2); opacity: 0; transform: translateY(20px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .solution-card.visible { opacity: 1; transform: translateY(0); }
+  .solution-card:nth-child(2) { transition-delay: .1s; }
+  .solution-card:nth-child(3) { transition-delay: .2s; }
+  .solution-card:nth-child(4) { transition-delay: .3s; }
+  .solution-card-phase { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: .75rem; }
+  .solution-card-title { font-size: 20px; font-weight: 600; letter-spacing: -.02em; margin-bottom: .75rem; }
+  .solution-card-text { font-size: 15px; color: var(--g5); line-height: 1.7; }
+
+  /* COMPARISON */
+  #comparison { padding: 160px 0; background: var(--black); border-top: 1px solid var(--g3); }
+  .comparison-inner { max-width: 1200px; margin: 0 auto; padding: 0 3rem; }
+  .comparison-header { max-width: 640px; margin-bottom: 64px; }
+  .comparison-headline { font-size: clamp(2rem,4vw,3.25rem); font-weight: 700; letter-spacing: -.04em; line-height: 1.1; margin-top: .5rem; }
+  .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .comparison-col { border-radius: 14px; overflow: hidden; }
+  .comparison-col-header { padding: 1.25rem 2rem; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .comparison-col.without .comparison-col-header { background: var(--g2); color: var(--g5); border: 1px solid var(--g3); border-bottom: none; border-radius: 14px 14px 0 0; }
+  .comparison-col.with .comparison-col-header { background: var(--accent); color: var(--black); border-radius: 14px 14px 0 0; }
+  .comparison-col-body { display: flex; flex-direction: column; }
+  .comparison-item { padding: 1.25rem 2rem; font-size: 15px; line-height: 1.6; display: flex; align-items: flex-start; gap: .875rem; border: 1px solid var(--g3); border-top: none; }
+  .comparison-col.without .comparison-item { background: var(--g1); color: var(--g5); }
+  .comparison-col.with .comparison-item { background: var(--g2); color: var(--g6); border-color: rgba(251,139,36,.2); }
+  .comparison-col.with .comparison-item:last-child { border-radius: 0 0 14px 14px; }
+  .comparison-col.without .comparison-item:last-child { border-radius: 0 0 14px 14px; }
+  .comp-icon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+  /* HOW IT WORKS */
+  #hiw { padding: 160px 0; background: var(--g1); border-top: 1px solid var(--g3); }
+  .hiw-inner { max-width: 1200px; margin: 0 auto; padding: 0 3rem; }
+  .hiw-header { margin-bottom: 80px; }
+  .hiw-headline { font-size: clamp(2rem,3.5vw,3rem); font-weight: 700; letter-spacing: -.04em; max-width: 520px; margin-top: .75rem; }
+  .hiw-flow { position: relative; display: flex; flex-direction: column; }
+  .hiw-spine { position: absolute; left: 31px; top: 48px; bottom: 48px; width: 1px; background: var(--g3); z-index: 0; }
+  .hiw-spine-fill { position: absolute; left: 31px; top: 48px; width: 1px; height: 0; background: linear-gradient(to bottom, var(--accent), rgba(251,139,36,.3)); z-index: 1; }
+  .hiw-step { display: grid; grid-template-columns: 64px 1fr; gap: 2.5rem; align-items: start; padding: 2.5rem 0; position: relative; z-index: 2; opacity: 0; transform: translateY(20px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  .hiw-step.visible { opacity: 1; transform: translateY(0); }
+  .hiw-step:nth-child(3) { transition-delay: .1s; }
+  .hiw-step:nth-child(4) { transition-delay: .2s; }
+  .hiw-step:nth-child(5) { transition-delay: .3s; }
+  .hiw-step:nth-child(6) { transition-delay: .4s; }
+  .hiw-step:not(:last-child)::after { content: ''; display: block; height: 1px; background: var(--g3); position: absolute; left: 64px; right: 0; bottom: 0; }
+  .hiw-node { width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--g3); background: var(--g2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color .4s, background .4s; }
+  .hiw-node.active { border-color: var(--accent); background: var(--accent-dim); }
+  .hiw-node-inner { width: 10px; height: 10px; border-radius: 50%; background: var(--g4); transition: background .4s, transform .4s var(--ease); }
+  .hiw-node.active .hiw-node-inner { background: var(--accent); transform: scale(1.3); }
+  .hiw-step-tag { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: .75rem; font-weight: 600; }
+  .hiw-step-title { font-size: 22px; font-weight: 600; letter-spacing: -.02em; margin-bottom: .75rem; }
+  .hiw-step-desc { font-size: 15px; color: var(--g5); line-height: 1.7; }
+
+  /* TESTIMONIALS */
+  #testimonials { padding: 160px 0; background: var(--black); border-top: 1px solid var(--g3); }
+  .test-inner { max-width: 1200px; margin: 0 auto; padding: 0 3rem; }
+  .test-header { margin-bottom: 64px; }
+  .test-headline { font-size: clamp(2rem,3.5vw,3rem); font-weight: 700; letter-spacing: -.04em; margin-top: .75rem; }
+  .test-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--g3); border: 1px solid var(--g3); border-radius: 16px; overflow: hidden; margin-bottom: 3rem; }
+  .test-stat-cell { background: var(--g2); padding: 2rem 1.75rem; display: flex; flex-direction: column; gap: .3rem; }
+  .test-stat-num { font-size: 38px; font-weight: 600; letter-spacing: -.04em; color: var(--accent); }
+  .test-stat-label { font-size: 13px; color: var(--g5); line-height: 1.4; }
+  .test-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+  .test-card { border: 1px solid var(--g3); border-radius: 16px; overflow: hidden; background: var(--g2); opacity: 0; transform: translateY(20px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+  .test-card.visible { opacity: 1; transform: translateY(0); }
+  .test-card:nth-child(2) { transition-delay: .08s; }
+  .test-card:nth-child(3) { transition-delay: .16s; }
+  .test-card:nth-child(4) { transition-delay: .24s; }
+  .test-card:nth-child(5) { transition-delay: .32s; }
+  .test-card:nth-child(6) { transition-delay: .4s; }
+  .test-screenshot { width: 100%; aspect-ratio: 4/3; background: var(--g3); display: flex; align-items: center; justify-content: center; }
+  .test-screenshot-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--g5); }
+
+  /* FAQ */
+  #faq { padding: 160px 0; background: var(--g1); border-top: 1px solid var(--g3); }
+  .faq-inner { max-width: 1200px; margin: 0 auto; padding: 0 3rem; display: grid; grid-template-columns: 1fr 2fr; gap: 6rem; align-items: start; }
+  .faq-left { position: sticky; top: 8rem; }
+  .faq-headline { font-size: clamp(2rem,3.5vw,3rem); font-weight: 700; letter-spacing: -.04em; margin-top: .75rem; margin-bottom: 1.5rem; }
+  .faq-sub { font-size: 15px; color: var(--g5); line-height: 1.7; }
+  .faq-list { display: flex; flex-direction: column; }
+  .faq-item { border-top: 1px solid var(--g3); overflow: hidden; }
+  .faq-item:last-child { border-bottom: 1px solid var(--g3); }
+  .faq-question { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0; background: none; border: none; color: var(--white); font-size: 16px; font-weight: 500; letter-spacing: -.01em; cursor: pointer; text-align: left; gap: 1rem; font-family: var(--font); }
+  .faq-icon { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--g4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s, transform .3s var(--ease); font-size: 18px; line-height: 1; color: var(--g5); }
+  .faq-item.open .faq-icon { background: var(--accent); color: var(--black); transform: rotate(45deg); border-color: var(--accent); }
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height .4s var(--ease); }
+  .faq-answer-inner { padding-bottom: 1.5rem; font-size: 15px; color: var(--g5); line-height: 1.7; }
+
+  /* FINAL CTA */
+  #cta { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--g1); border-top: 1px solid var(--g3); position: relative; overflow: hidden; }
+  .cta-bg-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--g3) 1px, transparent 1px), linear-gradient(90deg, var(--g3) 1px, transparent 1px); background-size: 80px 80px; opacity: .3; mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black, transparent); }
+  .cta-content { position: relative; z-index: 2; max-width: 780px; padding: 0 2rem; }
+  .cta-eyebrow { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; font-weight: 600; }
+  .cta-headline { font-size: clamp(2.5rem,5vw,4.5rem); font-weight: 700; letter-spacing: -.04em; line-height: 1.05; margin-bottom: 2rem; display: flex; flex-direction: column; align-items: center; gap: .1em; }
+  .cta-headline span { display: block; width: fit-content; }
+  .cta-headline .dim { color: var(--g4); }
+
+  footer { border-top: 1px solid var(--g3); padding: 2rem 3rem; display: flex; align-items: center; justify-content: space-between; background: var(--black); }
+  .footer-logo { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
+  .footer-links a { font-size: 12px; color: var(--g5); text-decoration: none; transition: color .2s; }
+  .footer-links a:hover { color: var(--white); }
+  .footer-copy { font-size: 12px; color: var(--g5); }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">AdMotion</div>
+  <ul class="nav-links">
+    <li><a href="#problem">The Problem</a></li>
+    <li><a href="#solution">The System</a></li>
+    <li><a href="#hiw">How It Works</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="#cta" class="nav-cta">Get instant access</a>
+</nav>
+
+<section id="hero">
+  <div class="hero-content">
+    <p class="hero-eyebrow">30-day transformation · Guaranteed</p>
+    <h1 class="hero-headline">In the <span class="accent">next 30 days</span><br>you go from zero to <span class="accent">AI</span><br><span class="accent">content that earns.</span></h1>
+    <p class="hero-sub">Learn to produce UGC, AI animation and ad-ready video from scratch. Then choose exactly how you earn from it — freelance clients, affiliate income, a faceless channel or digital products.</p>
+    <div class="hero-cta-wrap">
+      <a href="#cta" class="btn-primary">Get instant access — $97 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <p class="hero-guarantee">30-day money-back guarantee · Lifetime access · No experience needed</p>
+    </div>
+  </div>
+</section>
+
+
+
+<section id="features">
+  <div class="features-header reveal">
+    <p class="section-label">The output</p>
+    <h2 class="features-headline">Every video on this page was made using the system.</h2>
+  </div>
+  <div class="reel-wrap">
+    <div class="reel-stage" id="reelStage">
+      <button class="reel-arrow prev" id="reelPrev" aria-label="Previous"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="reel-arrow next" id="reelNext" aria-label="Next"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779059803/Camilo_Castan_eda_Ad_Creatives_for_Ecom_-_More_AI_styles_dropping_in_ACL_IU0FED_f6p5rf.mp4" autoplay muted loop playsinline></video></div>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779059829/ClaymotionAd4_qpgwy6.mp4" autoplay muted loop playsinline></video></div>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779061143/MAX_-_we_re_getting_insane_results_with_100_AI_content_a_few_weeks_ago_i_ocZTcj_yrohx8.mp4" autoplay muted loop playsinline></video></div>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779061130/Camilo_Castan_eda_Ad_Creatives_for_Ecom_-_This_is_a_literal_AI_ad_that_I_m_running_for_my_skool_to_put_my_mone_jnMG68_zp5muv.mp4" autoplay muted loop playsinline></video></div>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779059835/0x_ROAS_-_thanks_to_hookrate_for_building_an_AI_Animation_guide_for_my_commun_qiRuPG_zkqzqf.mp4" autoplay muted loop playsinline></video></div>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779061129/Camilo_Castan_eda_Ad_Creatives_for_Ecom_-_Crochet_ads_are_blowing_up_on_Meta_right_now._Not_because_they_re_cu_j4Lt92_nhce7y.mp4" autoplay muted loop playsinline></video></div>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779059849/ClaymotionAd3_fch5cd.mp4" autoplay muted loop playsinline></video></div>
+      <div class="reel-card"><video src="https://res.cloudinary.com/dz7okaa1c/video/upload/v1779061127/Camilo_Castan_eda_Ad_Creatives_for_Ecom_-_I_ll_outspend_anyone_on_X_until_AI_UGC_looks_perfect._Don_t_compare_b4dToL_ysgjpb.mp4" autoplay muted loop playsinline></video></div>
+    </div>
+    <div class="reel-progress"><div class="reel-progress-fill" id="reelFill"></div></div>
+    <div class="reel-ui" id="reelDots">
+      <div class="reel-dot active"></div><div class="reel-dot"></div><div class="reel-dot"></div>
+      <div class="reel-dot"></div><div class="reel-dot"></div><div class="reel-dot"></div>
+      <div class="reel-dot"></div><div class="reel-dot"></div>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="problem-inner">
+    <div class="problem-header reveal">
+      <p class="section-label">Why most people never get started</p>
+      <h2 class="problem-headline">The information is everywhere.<br>The system is nowhere.</h2>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <p class="problem-card-num">01</p>
+        <h3 class="problem-card-title">AI content that looks fake and does not convert</h3>
+        <p class="problem-card-text">You produced something. It looked like AI slop. It did not convert. The problem was never the tool — it was having no quality standard to aim for.</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-card-num">02</p>
+        <h3 class="problem-card-title">You bought the tools and got nothing</h3>
+        <p class="problem-card-text">Runway. CapCut. ChatGPT. You have the subscriptions. You watched the tutorials. You still have not made anything you would show a client. Tools without a system are just more monthly costs.</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-card-num">03</p>
+        <h3 class="problem-card-title">Free tutorials only ever cover one piece</h3>
+        <p class="problem-card-text">YouTube shows you how to use one tool for one step. Nobody shows you the full workflow. Nobody shows you what happens between finished video and first payment.</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-card-num">04</p>
+        <h3 class="problem-card-title">Three hours editing. Ten minutes with AI. Still stuck.</h3>
+        <p class="problem-card-text">You have seen what is possible. Someone made in 10 minutes what took you half a day. The gap is not talent. It is not equipment. It is not even the tools. It is the system connecting them.</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-card-num">05</p>
+        <h3 class="problem-card-title">Hidden costs nobody mentions upfront</h3>
+        <p class="problem-card-text">Every course that promised passive income buried the tool stack costs, the daily grind, and the six-month runway in the small print. You found out after you paid.</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-card-num">06</p>
+        <h3 class="problem-card-title">Bought three courses. Still felt stuck.</h3>
+        <p class="problem-card-text">Course fatigue is real. You are not lacking motivation or information. You are lacking a sequence that builds on itself and produces something real at every stage.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="solution">
+  <div class="solution-inner">
+    <div class="solution-header reveal">
+      <p class="section-label">What the course installs</p>
+      <h2 class="solution-headline">Four phases. One complete transformation.</h2>
+    </div>
+    <div class="solution-grid">
+      <div class="solution-card">
+        <p class="solution-card-phase">Phase 01 · Build the Skill</p>
+        <h3 class="solution-card-title">You will produce content brands cannot distinguish from human-made</h3>
+        <p class="solution-card-text">A five-tool stack chosen for the lowest learning curve and the highest output quality. The seven signals that make AI content look hyperrealistic. A quality standard that tells you exactly when work is charge-worthy — so you stop guessing and start producing at a level that converts.</p>
+      </div>
+      <div class="solution-card">
+        <p class="solution-card-phase">Phase 02 · Make it Convert</p>
+        <h3 class="solution-card-title">You will know how to make content people stop for — and act on</h3>
+        <p class="solution-card-text">The hook system, the five ad frameworks and the platform rules for TikTok, Meta and YouTube Shorts. Not theory — repeatable formats that produce results you can replicate. The difference between content that goes nowhere and content that actually converts.</p>
+      </div>
+      <div class="solution-card">
+        <p class="solution-card-phase">Phase 03 · Build the Business</p>
+        <h3 class="solution-card-title">You will have one income path chosen — with a system and a timeline behind it</h3>
+        <p class="solution-card-text">Pick one lane. Freelance clients, affiliate income, a faceless channel or digital products. Each has its own dedicated track built around your output, your pace and your life. The skill from Phase 1 powers all of them. You choose once. You can explore the others any time.</p>
+      </div>
+      <div class="solution-card">
+        <p class="solution-card-phase">Phase 04 · Scale and Sustain</p>
+        <h3 class="solution-card-title">You will have a system that runs when you do — and compounds over time</h3>
+        <p class="solution-card-text">Custom AI tools that cut production time in half. A mapped path from first dollar to consistent monthly income with specific actions at every milestone. Weekly updates mean the course never goes stale — every time the AI landscape shifts, the system adapts with it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="comparison">
+  <div class="comparison-inner">
+    <div class="comparison-header reveal">
+      <p class="section-label">The difference</p>
+      <h2 class="comparison-headline">With AdMotion vs Without AdMotion</h2>
+    </div>
+    <div class="comparison-grid reveal">
+      <div class="comparison-col without">
+        <div class="comparison-col-header">Without AdMotion</div>
+        <div class="comparison-col-body">
+          <div class="comparison-item"><span class="comp-icon">✕</span>Scattered tutorials with no sequence and no forward motion</div>
+          <div class="comparison-item"><span class="comp-icon">✕</span>AI content that looks like slop and kills trust before it converts</div>
+          <div class="comparison-item"><span class="comp-icon">✕</span>Four income paths that feel overwhelming to choose between</div>
+          <div class="comparison-item"><span class="comp-icon">✕</span>Hidden tool costs nobody warned you about</div>
+          <div class="comparison-item"><span class="comp-icon">✕</span>No way to know if your work is good enough to charge for</div>
+          <div class="comparison-item"><span class="comp-icon">✕</span>Still researching six months from now</div>
+        </div>
+      </div>
+      <div class="comparison-col with">
+        <div class="comparison-col-header">With AdMotion</div>
+        <div class="comparison-col-body">
+          <div class="comparison-item"><span class="comp-icon" style="color:var(--accent);">✓</span>A production system built in the right order from day one</div>
+          <div class="comparison-item"><span class="comp-icon" style="color:var(--accent);">✓</span>Hyperrealistic output brands cannot distinguish from human-made</div>
+          <div class="comparison-item"><span class="comp-icon" style="color:var(--accent);">✓</span>One income path chosen with a dedicated system and timeline</div>
+          <div class="comparison-item"><span class="comp-icon" style="color:var(--accent);">✓</span>Full tool stack under $50 a month. Named upfront. No asterisk.</div>
+          <div class="comparison-item"><span class="comp-icon" style="color:var(--accent);">✓</span>A quality standard that tells you exactly when work is charge-worthy</div>
+          <div class="comparison-item"><span class="comp-icon" style="color:var(--accent);">✓</span>Operating, not researching</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-cta-wrap reveal">
+      <a href="#cta" class="btn-primary">Get instant access — $97 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <p class="btn-guarantee">30-day money-back guarantee · Lifetime access</p>
+    </div>
+  </div>
+</section>
+
+<section id="hiw">
+  <div class="hiw-inner">
+    <div class="hiw-header reveal">
+      <p class="section-label">How it works</p>
+      <h2 class="hiw-headline">From your first video to your first income. In 30 days.</h2>
+    </div>
+    <div class="hiw-flow" id="hiwFlow">
+      <div class="hiw-spine"></div>
+      <div class="hiw-spine-fill" id="hiwSpine"></div>
+      <div class="hiw-step">
+        <div class="hiw-node" id="node0"><div class="hiw-node-inner"></div></div>
+        <div class="hiw-step-text">
+          <p class="hiw-step-tag">Phase one</p>
+          <h3 class="hiw-step-title">Build the Skill</h3>
+          <p class="hiw-step-desc">Learn to produce UGC, AI animation and ad-ready video from brief to finished file. You leave with a portfolio and a quality standard brands recognise.</p>
+        </div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-node" id="node1"><div class="hiw-node-inner"></div></div>
+        <div class="hiw-step-text">
+          <p class="hiw-step-tag">Phase two</p>
+          <h3 class="hiw-step-title">Make it Convert</h3>
+          <p class="hiw-step-desc">Learn the frameworks, hook system and platform rules that separate content that performs from content that gets scrolled past. You leave knowing how to engineer results deliberately.</p>
+        </div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-node" id="node2"><div class="hiw-node-inner"></div></div>
+        <div class="hiw-step-text">
+          <p class="hiw-step-tag">Phase three</p>
+          <h3 class="hiw-step-title">Build the Business</h3>
+          <p class="hiw-step-desc">Choose your income path. Freelance clients, affiliate income, a faceless channel or digital products. Each has its own dedicated system and timeline.</p>
+        </div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-node" id="node3"><div class="hiw-node-inner"></div></div>
+        <div class="hiw-step-text">
+          <p class="hiw-step-tag">Phase four</p>
+          <h3 class="hiw-step-title">Scale and Sustain</h3>
+          <p class="hiw-step-desc">Custom tools that cut production time in half. A clear path from your first dollar to a sustainable monthly income. Weekly updates that keep the course growing alongside you.</p>
+        </div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-node" id="node4"><div class="hiw-node-inner"></div></div>
+        <div class="hiw-step-text">
+          <p class="hiw-step-tag">Always on</p>
+          <h3 class="hiw-step-title">Community + Weekly Updates</h3>
+          <p class="hiw-step-desc">Every week a new workflow drop. Every month a live session with a practitioner running a real AI content business. Every future module added at no extra cost.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section id="faq">
+  <div class="faq-inner">
+    <div class="faq-left reveal">
+      <p class="section-label">Questions</p>
+      <h2 class="faq-headline">Still thinking about it?</h2>
+      <p class="faq-sub">Still have questions? Reach out at hello@admotion.co and we will get back to you within one business day.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item open">
+        <button class="faq-question" aria-expanded="true">Is this just another course that teaches tools with no path to income?<span class="faq-icon">+</span></button>
+        <div class="faq-answer" style="max-height:300px;"><p class="faq-answer-inner">No. Most AI content education keeps you in a state of consumption — buying modules, watching videos, feeling productive without producing anything that earns. This course is built differently. Every module ends with a real deliverable, not a reflection exercise. By the time you finish you do not have notes about how to make AI content. You have AI content. And a system for turning it into income across whichever path fits your life.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">I bought three courses and still felt stuck. Why would this be different?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">Because the problem was never your effort or your motivation. It was the structure. Most courses give you information without sequence — modules that cover individual tools with no thread connecting them to income. This course is built around a specific order where each step installs something you use immediately. You are not here to learn about AI content. You are here to build something with it. That distinction is the entire difference.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">If everyone can make AI content now will it all just look the same?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">Most AI content does look the same — because most people are using tools without a quality standard. The seven signals taught in Phase 1 are specifically designed to produce hyperrealistic output that brands cannot distinguish from human-made. The gap between AI slop and AI content that converts is not the tool. It is the system and the standard. That is what this course teaches.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">What if the tools change in three months and the course goes stale?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">The course updates weekly. Every time a new format drops or a tool shifts, the resources update with it. You are not buying a fixed snapshot of the AI content landscape in 2025. You are buying a production system and a community that stays current permanently. Every future module is added at no extra cost.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">Do I need to be on camera?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">No. The course covers five ad formats — AI UGC, Pixar-style animation, Claymotion, FR Chains and Knit style. None of them require you to appear on camera. The faceless channel and affiliate tracks are specifically designed for people who want to build an income without showing their face.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">What are the actual tool costs on top of the $97?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">Under $50 a month to start. Under $150 fully optimised at scale. No asterisk. Module 1 maps the complete tool stack with every option at every price point — including which tools have free tiers sufficient for the production modules. You know the full cost before you spend anything beyond the course itself. This is the thing every other course buries. We put it first.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">Is the AI content space already too saturated?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">Businesses will always need to run ads. The demand for content that converts does not disappear — it shifts. What becomes saturated is generic, low-quality output. What stays in demand is creative work that stops the scroll. This course is built around that standard. Every time a new format drops, the resources update. You are not learning a fixed system. You are building the ability to adapt.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">How much time does this actually take each week?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">The 30-day roadmap is built around one to two hours per day. That is the pace at which a student working a full-time job can move through the course and hit the week-by-week milestones. Lifetime access means you move at the speed your life allows. The only pace that does not work is zero.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">Will this work if I am a complete beginner?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">Yes. Module 1 assumes you have never opened a single AI tool. It walks you through setup, selection and your first production session step by step. The five-tool stack is chosen specifically because it has the lowest learning curve for beginners while producing professional-quality output. If you can follow a recipe, you can follow this course.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">How do I know which income path is right for me?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">You do not need to know before you start. The first three phases build the production skill that powers all four paths. By the time you reach the business module you have enough context about your own output, pace and preferences to choose clearly. The decision matrix inside that module walks you through it. Most students know within the first week which direction they are heading anyway.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">What happens after I purchase?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">You get instant access to all eight modules, the full resource library, the custom AI tools and the private community. Everything is available immediately. There is no waiting period, no cohort start date and no expiry. You start Module 1 today if you want to.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">What is the refund policy?<span class="faq-icon">+</span></button>
+        <div class="faq-answer"><p class="faq-answer-inner">Complete Module 1 and Module 2. Do the sessions. Post your first piece of content. If after doing that you genuinely feel the course does not deliver on what this page promised, email us and we will refund you in full. No forms. No waiting period. No questions. If you give it a real chance and it does not deliver, that is on us.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cta">
+  <div class="cta-bg-grid"></div>
+  <div class="cta-content">
+    <p class="cta-eyebrow reveal">The decision</p>
+    <h2 class="cta-headline reveal">
+      <span>The only thing between you and this skill</span>
+      <span class="dim">is the decision to start</span>
+    </h2>
+    <div class="reveal" style="margin-top:2rem;">
+      <div class="section-cta-wrap" style="margin-top:0;">
+        <a href="#" class="btn-primary">Get instant access — $97 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <p class="btn-guarantee">30-day money-back guarantee · One payment · Lifetime access</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">AdMotion</span>
+  <ul class="footer-links"><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Refund Policy</a></li></ul>
+  <span class="footer-copy">Questions before buying? hello@admotion.co</span>
+</footer>
+
+<script>
+  (function(){
+    const p=new URLSearchParams(window.location.search);
+    if(p.get('ref')==='quiz'){
+      window.addEventListener('load',function(){
+        setTimeout(function(){
+          const v=document.getElementById('hero-video');
+          if(!v) return;
+          v.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(function(){ v.classList.add('quiz-pulse'); setTimeout(()=>v.classList.remove('quiz-pulse'),2400); },800);
+        },400);
+      });
+    }
+  })();
+
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal,.problem-card,.solution-card,.test-card').forEach(el=>io.observe(el));
+
+  const stepIo=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); stepIo.unobserve(e.target); } });
+  },{threshold:.2});
+  document.querySelectorAll('.hiw-step').forEach(el=>stepIo.observe(el));
+
+  const hiwFlow=document.getElementById('hiwFlow');
+  const spineEl=document.getElementById('hiwSpine');
+  const nodes=['node0','node1','node2','node3','node4'].map(id=>document.getElementById(id));
+  function updateSpine(){
+    const rect=hiwFlow.getBoundingClientRect();
+    const winH=window.innerHeight;
+    const scrolled=Math.max(0,winH*.5-rect.top);
+    const pct=Math.min(1,Math.max(0,scrolled/rect.height));
+    spineEl.style.height=(pct*(rect.height-96))+'px';
+    nodes.forEach(n=>{ const nr=n.getBoundingClientRect(); n.classList.toggle('active',nr.top+nr.height/2<winH*.55); });
+  }
+  window.addEventListener('scroll',updateSpine,{passive:true});
+  updateSpine();
+
+  const cards=Array.from(document.querySelectorAll('.reel-card'));
+  const dots=Array.from(document.querySelectorAll('#reelDots .reel-dot'));
+  const fill=document.getElementById('reelFill');
+  const n=cards.length;
+  let active=1,reelTimer;
+  function posFor(i,a){ const r=(i-a+n)%n; if(r===0) return 'active'; if(r===1) return 'next'; if(r===n-1) return 'prev'; return 'hidden'; }
+  function render(){ cards.forEach((c,i)=>c.setAttribute('data-pos',posFor(i,active))); dots.forEach((d,i)=>d.classList.toggle('active',i===active)); fill.classList.remove('running'); void fill.offsetWidth; fill.classList.add('running'); }
+  function advance(dir){ active=(active+dir+n)%n; render(); }
+  function startTimer(){ clearInterval(reelTimer); reelTimer=setInterval(()=>advance(1),3000); }
+  render(); startTimer();
+  document.getElementById('reelNext').addEventListener('click',()=>{ advance(1); startTimer(); });
+  document.getElementById('reelPrev').addEventListener('click',()=>{ advance(-1); startTimer(); });
+  dots.forEach((d,i)=>d.addEventListener('click',()=>{ active=i; render(); startTimer(); }));
+  cards.forEach((c,i)=>c.addEventListener('click',()=>{ active=i; render(); startTimer(); }));
+
+  document.querySelectorAll('.faq-question').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const item=btn.closest('.faq-item'),isOpen=item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i=>{ i.classList.remove('open'); i.querySelector('.faq-answer').style.maxHeight='0'; i.querySelector('button').setAttribute('aria-expanded','false'); });
+      if(!isOpen){ item.classList.add('open'); item.querySelector('.faq-answer').style.maxHeight='400px'; btn.setAttribute('aria-expanded','true'); }
+    });
+  });
+</script>
+</body>
+</html>
